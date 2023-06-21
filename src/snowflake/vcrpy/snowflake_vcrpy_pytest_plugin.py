@@ -21,6 +21,15 @@ def _process_request_recording(request):
 
     Filter and scrub Snowflake credentials.
     """
+    # only look to record snowflake requests
+    is_not_snowflake = "snowflakecomputing" not in request.uri
+    # don't record logins
+    is_login = "login-request" in request.uri
+    # don't record sso logins to snowflake
+    is_auth = "authenticator-request" in request.uri
+    if any([is_not_snowflake, is_login, is_auth]):        
+        return None
+
     # filter request id
     if _SCRUB_SNOWFLAKE_INFO:
         for key, value in request.query:
